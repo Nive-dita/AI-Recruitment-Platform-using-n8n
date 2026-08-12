@@ -1,0 +1,276 @@
+{
+  "name": "Workflow 6: Recruitment Analytics",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bf3078b5-a8d9-408f-83c4-49d9c3fcb223",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "VYGO6XE6SL0xn1fW",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b00216d3-643d-4e95-91fa-a963f65cb950",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tW2cOX41fcXfjJ3t",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\n\nconst total = rows.length;\n\nlet shortlisted = 0;\nlet selected = 0;\nlet rejected = 0;\nlet interview = 0;\n\nlet scoreSum = 0;\nlet scoreCount = 0;\n\nfor (const row of rows) {\n  const data = row.json;\n\n  if (data.Status === \"Shortlist\") {\n    shortlisted++;\n  }\n\n  if (data.Status === \"Interview Scheduled\") {\n    interview++;\n  }\n\n  if (data[\"Final Decision\"] === \"Selected\") {\n    selected++;\n  }\n\n  if (\n    data[\"Final Decision\"] === \"Rejected\" ||\n    data.Status === \"Rejected\"\n  ) {\n    rejected++;\n  }\n\n  const score = Number(data[\"Resume Score\"]);\n\n  if (!isNaN(score) && score !== 0) {\n    scoreSum += score;\n    scoreCount++;\n  }\n}\n\nconst average = scoreCount > 0\n  ? Number((scoreSum / scoreCount).toFixed(2))\n  : 0;\n\nreturn [\n  {\n    json: {\n      ID: 1,\n      \"Total Candidates\": total,\n      \"AI Shortlisted\": shortlisted,\n      \"Interview Scheduled\": interview,\n      \"Selected\": selected,\n      \"Rejected\": rejected,\n      \"Average Resume Score\": average,\n      Timestamp: new Date().toISOString()\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1813935f-b5b1-4e5e-8793-1ed2052b0b71",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1218733821,
+          "mode": "list",
+          "cachedResultName": "Analytics",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=1218733821"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.ID }}",
+            "Total Candidates": "={{ $json['Total Candidates'] }}",
+            "Timestamp": "={{ $json.Timestamp }}",
+            "Interview Scheduled": "={{ $json['Interview Scheduled'] }}",
+            "AI Shortlisted": "={{ $json['AI Shortlisted'] }}",
+            "Selected": "={{ $json.Selected }}",
+            "Rejected": "={{ $json.Rejected }}",
+            "Average Resume Score": "={{ $json['Average Resume Score'] }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total Candidates",
+              "displayName": "Total Candidates",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Shortlisted",
+              "displayName": "AI Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interview Scheduled",
+              "displayName": "Interview Scheduled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Selected",
+              "displayName": "Selected",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rejected",
+              "displayName": "Rejected",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Average Resume Score",
+              "displayName": "Average Resume Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        0
+      ],
+      "id": "7a58b76c-5d79-48bd-92ee-30e14fe3a16d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tW2cOX41fcXfjJ3t",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "330fa97b-09c5-4617-8e67-b2cf2d036cc6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64affd51aea1501ebc7df35e7eebc67f55081bea70570e8017630dfef8871f88"
+  },
+  "nodeGroups": [],
+  "id": "kvPm7B8SKnsUZLiK",
+  "tags": []
+}

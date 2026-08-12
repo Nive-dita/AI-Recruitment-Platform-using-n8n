@@ -1,0 +1,172 @@
+{
+  "name": "Workflow:3 Candidate Shortlisting & HR Approval",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "c6c8b95c-1e5e-4def-8ee4-55bb29f15a1f",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "VYGO6XE6SL0xn1fW",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "da20cb1c-4a6a-424f-a42d-49b4debe5a82",
+              "leftValue": "={{ $json['HR Approval'] }}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "fdc51dc9-bf47-4c6f-bd24-96121f9d990d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "niveditas916@gmail.com",
+        "subject": "New Candidate Shortlisted",
+        "message": "=A candidate has been shortlisted.\n\nName: {{ $json[\"Name\"] }}\n\nRole: {{ $json[\"Applied Role\"] }}\n\nResume Score: {{ $json[\"Resume Score\"] }}\n\nSummary:\n\n{{ $json[\"AI Summary\"] }}\n\nPlease review the candidate and proceed with interview scheduling.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2a0d823a-f78e-4d2c-af71-39acdaeb798d",
+      "name": "Send a message",
+      "webhookId": "ae6a780e-314b-491c-84ac-d8171e9678b6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F561xjj0u8OIVql5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json[\"Email\"] }}",
+        "subject": "Update on Your Application",
+        "message": "=Dear {{ $json[\"Name\"] }},  Thank you for applying for the {{ $json[\"Applied Role\"] }} position.  After reviewing your application, we have decided not to move forward at this time.  We appreciate your interest and wish you success in your future opportunities.  Regards, HR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        192
+      ],
+      "id": "0d083cff-c447-45b4-8a7c-ea39d218ee02",
+      "name": "Send a message1",
+      "webhookId": "0ff8b603-2c0f-4401-8db1-f3b59a4b276c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F561xjj0u8OIVql5",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c4aad7e8-1b60-40d7-9903-f4f2fffa10c9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64affd51aea1501ebc7df35e7eebc67f55081bea70570e8017630dfef8871f88"
+  },
+  "nodeGroups": [],
+  "id": "wU8EO1wVCywE4l0W",
+  "tags": []
+}

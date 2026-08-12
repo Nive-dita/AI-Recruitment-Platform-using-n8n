@@ -1,0 +1,392 @@
+{
+  "name": "Workflow 5: Offer Letter Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "11e11f01-43fe-47b7-99c3-aab6e20179d3",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "VYGO6XE6SL0xn1fW",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8f4f709a-dc73-4097-ae04-4f3d25260967",
+              "leftValue": "={{ $json['Final Decision'] }}",
+              "rightValue": "=Selected",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "3831968b-b389-4429-8e3e-292d61b96a69",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e14e287-581e-4204-b25d-1d8e4f26d223",
+              "name": "Name",
+              "value": "={{ $('Google Sheets Trigger').item.json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "103c62e6-6b1f-4be5-ad40-005ddb2c386c",
+              "name": "Email",
+              "value": "={{ $('Google Sheets Trigger').item.json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "a42b4f9d-459c-489a-8c6e-4eb1dae1ee4f",
+              "name": "Applied Role",
+              "value": "={{ $('Google Sheets Trigger').item.json['Applied Role'] }}",
+              "type": "string"
+            },
+            {
+              "id": "d9465b87-7393-4225-8e7c-84f87a49e639",
+              "name": "Joining Date",
+              "value": "15 August 2026",
+              "type": "string"
+            },
+            {
+              "id": "c8c9b42f-b1d3-437d-a3bd-c023f700ca65",
+              "name": "Company",
+              "value": "ABC Technologies",
+              "type": "string"
+            },
+            {
+              "id": "2fdbd525-9b90-458a-90ff-509aad3ac747",
+              "name": "Location",
+              "value": "Remote",
+              "type": "string"
+            },
+            {
+              "id": "0558994c-9685-4351-9cc9-9f15c44f9065",
+              "name": "Salary",
+              "value": "₹8 LPA",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c3ec1657-e44d-4268-a5ae-85f0197ddf90",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ \"Congratulations! Offer Letter for \" + $json[\"Applied Role\"] + \" Position\" }}",
+        "message": "=Dear {{ $json.Name }},  <br><br>  Congratulations!  <br><br>  We are delighted to offer you the position of <b>{{ $json[\"Applied Role\"] }}</b> at <b>{{ $json.Company }}</b>.  <br><br>  <b>Offer Details</b>  <ul> <li>Joining Date: {{ $json[\"Joining Date\"] }}</li> <li>Location: {{ $json.Location }}</li> <li>CTC: {{ $json.Salary }}</li> </ul>  We were impressed with your qualifications and believe you will be a valuable member of our team.  <br><br>  Please reply to this email within 5 working days to confirm your acceptance.  <br><br>  We look forward to welcoming you to our team.  <br><br>  Regards,<br> HR Team<br> {{ $json.Company }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4f71a0e6-73c3-4bbe-9cda-2e6840dc2ee3",
+      "name": "Send a message",
+      "webhookId": "149c91db-9ea5-424a-ad73-f03b7dc6aa8f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F561xjj0u8OIVql5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Offer Sent",
+            "Phone": "={{ $('Google Sheets Trigger').item.json.Phone }}"
+          },
+          "matchingColumns": [
+            "Phone"
+          ],
+          "schema": [
+            {
+              "id": "Candidate ID",
+              "displayName": "Candidate ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Applied Role",
+              "displayName": "Applied Role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume Link",
+              "displayName": "Resume Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume Score",
+              "displayName": "Resume Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "HR Approval",
+              "displayName": "HR Approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Interview Date",
+              "displayName": "Interview Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Final Decision",
+              "displayName": "Final Decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "858c21c7-cba5-49aa-9a71-e7b58ab085a7",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tW2cOX41fcXfjJ3t",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "53261357-9f9f-4eb0-81e5-a6a03dcec85d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64affd51aea1501ebc7df35e7eebc67f55081bea70570e8017630dfef8871f88"
+  },
+  "nodeGroups": [],
+  "id": "fzACV60Jy1fwNGAz",
+  "tags": []
+}

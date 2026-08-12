@@ -1,0 +1,417 @@
+{
+  "name": "Workflow 4: Interview Scheduling",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": []
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -112
+      ],
+      "id": "a976feeb-9e44-4c6f-8ee4-59d4e02f8bc2",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "VYGO6XE6SL0xn1fW",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8dfb10a3-c607-4561-9668-8dc7835359b8",
+              "leftValue": "={{ $json['HR Approval'] }}",
+              "rightValue": "Approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -352,
+        -112
+      ],
+      "id": "e14db066-9b5f-4115-8ac9-f64e6f929765",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "d76c7af4b223c3fdbfdc52b503b4f836542cb8c4b01add335fc6b9f93364a6e4@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "CalanderNiv"
+        },
+        "additionalFields": {
+          "description": "=Candidate: {{ $('Google Sheets Trigger').item.json.Name }}  Role: {{ $('Google Sheets Trigger').item.json['Applied Role'] }}  Email: {{ $('Google Sheets Trigger').item.json.Email }}  Resume Score: {{ $('Google Sheets Trigger').item.json['Resume Score'] }}  AI Summary: {{ $('Google Sheets Trigger').item.json['AI Summary'] }}",
+          "summary": "=Interview with {{ $json.Name }} for {{ $json[\"Applied Role\"] }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        -208
+      ],
+      "id": "291256da-1365-4eb4-83ea-b6083c1af50f",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "ISl3WIUwIj8f5V2t",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "Interview Invitation",
+        "message": "=Dear {{ $('Google Sheets Trigger').item.json.Name }},  Congratulations!  You have been shortlisted for the position of {{ $('Google Sheets Trigger').item.json['Applied Role'] }}.  Interview Details  Date: {{ $('Google Sheets Trigger').item.json['Interview Date'] }}  Mode: Google Meet  We look forward to speaking with you.  Regards, HR Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -208
+      ],
+      "id": "941ccaf9-4d5c-4576-91fe-a60ca8fe7129",
+      "name": "Send a message",
+      "webhookId": "b0a5ac75-02ce-47a2-bf65-ec8a800b3b08",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F561xjj0u8OIVql5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ",
+          "mode": "list",
+          "cachedResultName": "Recruitment Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Candidates",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14MgG3sXo0s4GKl20f_z4vhsnufhVdy8eemaxLTs-jxQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Interview Scheduled",
+            "HR Approval": "Approved",
+            "Interview Date": "={{ $('Create an event').item.json.start.dateTime }}",
+            "Phone": "={{ $('Google Sheets Trigger').item.json.Phone }}"
+          },
+          "matchingColumns": [
+            "Phone"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Applied Role",
+              "displayName": "Applied Role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Resume Link",
+              "displayName": "Resume Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Resume Score",
+              "displayName": "Resume Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "HR Approval",
+              "displayName": "HR Approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Interview Date",
+              "displayName": "Interview Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Final Decision",
+              "displayName": "Final Decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        -208
+      ],
+      "id": "1d0a827a-9e26-4d27-8306-19dff5ef40f0",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tW2cOX41fcXfjJ3t",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        -208
+      ],
+      "id": "c1ee2d7a-c3bd-4a39-a0af-d4010d424d7e",
+      "name": "Wait",
+      "webhookId": "f9cb1a70-9760-47b3-8497-a90f99c9c8e0"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "Reminder: Your interview is tomorrow.",
+        "message": "=Dear {{ $('Google Sheets Trigger').item.json.Name }},  <p>This is a friendly reminder that your interview is scheduled for tomorrow.</p>  <h3>Interview Details</h3>  <ul>   <li><b>Position:</b> {{ $('Google Sheets Trigger').item.json['Applied Role'] }}</li>   <li><b>Date & Time:</b> {{ $('Update row in sheet').item.json['Interview Date'] }}</li>   <li><b>Status:</b> {{ $('Wait').item.json.Status }}</li> </ul>  <p>Please join the meeting 10 minutes before the scheduled time and ensure you have a stable internet connection.</p>  <p>If you have any questions or need to reschedule, please reply to this email.</p>  <p>Best Regards,<br> HR Team<br> AI Recruitment Platform</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        -208
+      ],
+      "id": "f665ee60-8108-42a4-b46d-03cd2d88100b",
+      "name": "Send a message1",
+      "webhookId": "0694b437-0204-47b9-ab6d-6e947848aa7f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "F561xjj0u8OIVql5",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fccb7610-df86-4825-abb2-90e34e498085",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64affd51aea1501ebc7df35e7eebc67f55081bea70570e8017630dfef8871f88"
+  },
+  "nodeGroups": [],
+  "id": "gFyVXS7LjvtXQjN1",
+  "tags": []
+}
